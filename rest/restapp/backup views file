@@ -1,0 +1,49 @@
+class Ridestatus(viewsets.ModelViewSet):
+    queryset = ride.objects.all().order_by('date_Created').filter()
+    serializer_class = RideSerializer
+
+class RideStatusUpdateView(CreateAPIView):
+    queryset = ride.objects.all().order_by('date_Created').filter()
+    serializer_class = UpdateSerializer
+    def patch(self, request, pk):
+        try:
+            ride_instance = ride.objects.get(pk=pk)
+        except ride.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateSerializer(ride_instance, partial=True)
+        queryset = ride.objects.all().order_by('date_Created').filter()
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,queryset)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        ??????????????????????????
+        urls
+
+        from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path,include
+from rest_framework import routers
+from restapp.views import CreateUserview, Ridestatus,RideStatusUpdateView
+from restapp import views
+
+router=routers.DefaultRouter()
+router=routers.SimpleRouter()
+# router.register('update',UpdateViewset)
+router.register('ride',Ridestatus)
+# router.register('due',views.Due)
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include(router.urls)),
+    path('register/',views.CreateUserview.as_view(),name='user'),
+    path('api_auth',include('rest_framework.urls')),
+    path('home',views.home.as_view(),name='home'),
+    path('update/<int:pk>/status/',RideStatusUpdateView.as_view(), name='ride-status-update'),
+
+    # path('',include(router.urls))
+]
